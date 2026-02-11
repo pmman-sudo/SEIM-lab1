@@ -31,24 +31,23 @@
 
 As a SOC Level 1 Analyst, I’ve learned that a SIEM is only as powerful as the person writing the queries. During this investigation on the TryHackMe platform, I analyzed Windows, Linux, and Web logs to hunt down malicious activity. Here is my step-by-step breakdown of the investigation.
 
-*PHASE 1:*
+## PHASE 1
 
-Windows Host Analysis (Task 4)
+## Windows Host Analysis:
 In this stage, I focused on identifying a command-and-control (C2) connection and how the attacker maintained a foothold in the system. To identify the suspicious network connection, I used the following query:
 
-*​index=task4 EventCode=3 ComputerName=WIN-105 | table _time ComputerName Image SourceIp SourcePort DestinationIp DestinationPort Protocol*
+**​index=task4 EventCode=3 ComputerName=WIN-105 | table _time ComputerName Image SourceIp SourcePort DestinationIp DestinationPort Protocol**
 
 Why I Used This Query:
 
-*​index=task4:* Targets the specific dataset assigned for the Windows investigation.
+**​index=task4:** Targets the specific dataset assigned for the Windows investigation.
 
-*​EventCode=3:* This is the Sysmon event code for Network Connection. It allowed me to see exactly which processes were communicating over the network.
+**​EventCode=3:** This is the Sysmon event code for Network Connection. It allowed me to see exactly which processes were communicating over the network.
 
-*​table ...:* I formatted the results into a table to easily correlate the process name (SharePoInt.exe) with its destination IP (10.10.114.80) and port (5678).
+**​table ...:** I formatted the results into a table to easily correlate the process name (SharePoInt.exe) with its destination IP (10.10.114.80) and port (5678).
 
 
 <img width="780" height="282" alt="image" src="https://github.com/user-attachments/assets/c9382a5c-ab4c-4738-984c-354172068daa" />
-
 
 
 
@@ -63,14 +62,12 @@ Why I Used This Query:
 
 
 
-*PHASE2:*
+## PHASE 2
 
-Linux Forensic Analysis (Task 5)
+## Linux Forensic Analysis:
 I pivoted to the Linux logs to track how an attacker gained administrative rights and created a backdoor.
 
-
 <img width="780" height="274" alt="image" src="https://github.com/user-attachments/assets/6631d0a8-7016-474c-8c71-fd3c8af1741c" />
-
 
 
 * Privilege Escalation: By analyzing sudo and su logs in Splunk, I identified that the user jack-brown successfully escalated their privileges to root
@@ -89,22 +86,19 @@ I pivoted to the Linux logs to track how an attacker gained administrative right
 
 * Listener Configuration: I found a persistence mechanism configured to connect or listen on port 7654.
 
-*PHASE 3:* 
+## PHASE 3
 
-Web Application Log Analysis (Task 6)
+## Web Application Log Analysis:
 Finally, I analyzed the web server logs to classify external threats targeting the company's website.
-
-
 
 * Targeted URI: I used a statistical query to find the most requested path. The URI wp-login.php had the highest number of requests, indicating a focus on the login portal.
 
 <img width="780" height="425" alt="image" src="https://github.com/user-attachments/assets/4dda9bda-ca05-4c41-a7b4-41a9e84540c3" />
 
-
 * Attacker Identification: The source of this activity was the IP address 10.10.243.134.
 * Attack Classification: Based on the high volume of POST requests to the login page, I classified this activity as a Brute Force attack.
 * Tooling Discovery: I examined the User-Agent strings and discovered the attacker was using WPScan (a WordPress security scanner) to automate the attack.
 
-* SUMMARY
+## SUMMARY
 
 By correlating data across different log sources, I was able to piece together a full narrative: an external brute force attack led to initial access, followed by privilege escalation and the establishment of persistent backdoors on both Windows and Linux systems.
